@@ -32,36 +32,44 @@ const response = await inquirer.prompt([
   {
     type: "input",
     name: "installation",
-    message: "Enter Installation",
+    message: "Enter installation details",
   },
   {
     type: "input",
     name: "usage",
-    message: "Enter Usage",
-  },
-  {
-    type: "list",
-    name: "license",
-    message: "What size do you need?",
-    choices: licenses.map((license) => license.name),
-    filter(name) {
-      return licenses.find((license) => license.name === name);
-    },
+    message: "Enter usage details",
+    filter(val) {
+      return `    ${val}`
+    }
   },
   {
     type: "input",
     name: "contributing",
-    message: "Enter a contributing",
+    message: "Enter contributing information",
   },
   {
     type: "input",
     name: "tests",
-    message: "Enter a tests",
+    message: "Enter tests information",
   },
   {
     type: "input",
-    name: "questions",
-    message: "Enter a questions",
+    name: "username",
+    message: "Enter GitHub username",
+  },
+  {
+    type: "input",
+    name: "email",
+    message: "Enter email address",
+  },
+  {
+    type: "list",
+    name: "license",
+    message: "Please choose a license",
+    choices: licenses.map((license) => license.name),
+    filter(name) {
+      return licenses.find((license) => license.name === name);
+    },
   },
 ]);
 console.log(response);
@@ -81,12 +89,25 @@ Object.keys(sections).forEach((key) => {
   tableContent += `- [${sectionName}](#${key})\n`;
 
   // sectionContent += `### ${sectionName}\n${sections[key]}\n`;
-  if (key === "license") {
-    sectionContent += `### ${sectionName}\nDistributed under the [${response.license.name}](${response.license.link}) License\n`;
+  if (key === "license" || key === "username" || key === "email") {
+    if (key === "license") {
+      sectionContent += `### ${sectionName}\nDistributed under the [${response.license.name}](${response.license.link}) License\n`;
+    }
+    if (key === "username") {
+      sectionContent += `### Questions\n`;
+     
+      sectionContent += `[GitHub Profile](https://github.com/${response.username})\n\n`;
+    }
+    if (key === "email") {
+      // sectionContent += `### Questions\n`;
+      
+      sectionContent += `[Contact Me](mailto:${response.email}) if you have additional questions\n`;
+    }
   }
   else {
     sectionContent += `### ${sectionName}\n${sections[key]}\n`;
   }
+  
 });
 
 readmeContent += tableContent + sectionContent;
