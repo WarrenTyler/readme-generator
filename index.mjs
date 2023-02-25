@@ -18,6 +18,8 @@ const licenses = [
     link: "http://www.gnu.org/licenses/agpl-3.0",
   },
 ];
+
+// Get input from user
 const response = await inquirer.prompt([
   {
     type: "input",
@@ -33,14 +35,27 @@ const response = await inquirer.prompt([
     type: "input",
     name: "installation",
     message: "Enter installation details",
+    filter(val) {
+      // use a tab to format a block in readme
+      return addCodeBlock(val);
+    },
+    // display string with tabs removed
+    transformer(val) {
+      return removeCodeBlock(val);
+    },
   },
   {
     type: "input",
     name: "usage",
     message: "Enter usage details",
     filter(val) {
-      return `    ${val}`
-    }
+      // use a tab to format a block in readme
+      return addCodeBlock(val);
+    },
+    // display string with tabs removed
+    transformer(val) {
+      return removeCodeBlock(val);
+    },
   },
   {
     type: "input",
@@ -72,46 +87,61 @@ const response = await inquirer.prompt([
     },
   },
 ]);
-console.log(response);
 
-const { title, ...sections } = response;
+// Seperate the items that vary and keep the rest together
+const { title, license, email, username, ...sections } = response;
 
+// Add the license badge at the top of readme
 let readmeContent = `# ${title}\n
-  [![${response.license.name} License](${response.license.shield})](${response.license.link})\n
+  [![${license.name} License](${license.shield})](${license.link})\n
 `;
+
+// Start the table of contents section
 let tableContent = `## Table of contents
 - [Table of contents](#table-of-contents)\n`;
+
+// Start the sections contents section
 let sectionContent = `\n`;
 
+// Use a loop to fill in all generic details of table of contents and sections content
 Object.keys(sections).forEach((key) => {
   const sectionName = key.replace(/^./, (str) => str.toUpperCase());
 
   tableContent += `- [${sectionName}](#${key})\n`;
 
-  // sectionContent += `### ${sectionName}\n${sections[key]}\n`;
-  if (key === "license" || key === "username" || key === "email") {
-    if (key === "license") {
-      sectionContent += `### ${sectionName}\nDistributed under the [${response.license.name}](${response.license.link}) License\n`;
-    }
-    if (key === "username") {
-      sectionContent += `### Questions\n`;
-     
-      sectionContent += `[GitHub Profile](https://github.com/${response.username})\n\n`;
-    }
-    if (key === "email") {
-      // sectionContent += `### Questions\n`;
-      
-      sectionContent += `[Contact Me](mailto:${response.email}) if you have additional questions\n`;
-    }
-  }
-  else {
-    sectionContent += `### ${sectionName}\n${sections[key]}\n`;
-  }
-  
+  sectionContent += `### ${sectionName}\n${sections[key]}\n`;
 });
 
+// Add "Questions" and "License" links to table of contents
+tableContent += `- [Questions](#questions)\n`;
+tableContent += `- [License](#license)\n`;
+
+// Add "Questions" to section content
+sectionContent += `### Questions\nIf you have additional questions contact me via:\n\n`;
+sectionContent += `[GitHub](https://github.com/${username})\n\n`;
+sectionContent += `[Email](mailto:${email})\n`;
+
+// Add "License" to section content
+sectionContent += `### License\nDistributed under the [${license.name}](${license.link}) License\n`;
+
+// Join all content together
 readmeContent += tableContent + sectionContent;
 
+// Create README in output folder
 await fs.writeFile("./output/README.md", readmeContent);
 
+// Inform user that file has been created
 console.log("success!");
+
+// FUNCTIONS --------------------------- //
+
+// Turn text into a code block format for MD
+function addCodeBlock(text) {
+  return "```\n" + text + "\n```";
+}
+
+// Turn a MD formated code block into plain text 
+function removeCodeBlock(text) {
+  return `${text.replace(/```\n|\n```/g, "")}`;
+}
+
