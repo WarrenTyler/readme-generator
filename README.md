@@ -31,6 +31,9 @@ A walkthrough video demonstrating the functionality of the application:
 
 ![Walkthrough](./assets/img/walkthrough.gif)
 
+A [Sample README](./output/sample-README.md) generated using app.
+
+
 ## Credits
 
 N/A.
